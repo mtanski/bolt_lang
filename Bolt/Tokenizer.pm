@@ -25,8 +25,8 @@ our %tokens = (
   "l_curly"           => qr/ \{ /x,
   "r_curly"           => qr/ \} /x,
 
-  "keyword"           => qr{ as | case | for | function | if | import | lambda | object | 
-                             switch | struct | var }x,
+  "keyword"           => qr{ as | break | continue | case | for | function | if | import | 
+                             lambda | object | switch | struct | var }x,
 
   "operator"          => qr{ \+ | - | \* | \\ | % |
                              = |
