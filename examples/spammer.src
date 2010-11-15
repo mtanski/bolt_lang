@@ -1,0 +1,108 @@
+/* vim: set ts=4 sw=4 :  */
+import cmdline;
+import net;
+import service.eventloop (event, loop) as ev;
+
+request : object
+{
+	id:	uint32;
+};
+
+client : object
+{
+	socket : net.socket;
+	pending_requests : map[type:ref request];
+};
+
+msg : struct(packed:true)
+{
+	header[4]	: uint8;
+	len       	: uint32[attr=netorder];
+	id        	: uint32[attr=netorder];
+	url_off		: uint32;
+	url_len	  	: uint32;
+	headers_off : uint32;
+	headers_num : uint16;
+	body_off	: uint32;
+	body_len  	: uint32;
+};
+
+client_msg : object
+{
+	msg : *msg;
+
+	create_error(id: uint32): function[attr:unsafe,create]()
+	{
+		msg = make msg;
+		msg = { id = id, header = [ 'S', 'P', 'A', 'M'] };
+	}
+
+	get_url() : function()
+	{
+
+	}
+
+	get_body() : function(body: asci_str)
+	{
+		return {};
+	}
+}
+
+client_msg(data: bytedata) : function()
+{
+	idle_worker : worker_child;
+	reason		: error;
+
+	(idle_worker, reason) = idle_worker();
+}
+
+client_connected(listen : net.socket, client : net.socket) : function()
+{
+
+}
+
+options : object
+{
+	listen_addr : str;
+
+	create(args[] : str) : function() {
+		var args_spec[] : cmdline.argtable =  { {"o", "options"}, "Options file" };
+
+		var parse_func = lambda(name: str, following[]: str) function(int) {
+			switch(name) {
+				case "o":
+					listen_addr = following[0];
+					return 1;
+			}
+
+			return -1;
+        };
+
+		cmdline.parse(args, argspec, parse_func);
+	}
+}
+
+state : struct
+{
+	listen_socket : net.socket;
+}
+
+setup_listener(options: options) : function(ev.event)
+{
+	var address = net.addr.parse(options.listen_addr);
+	var socket = net.socket.listen(address);
+
+	return socket;
+}
+
+main(arguments[]: str) : function() [external]
+{
+	var state : state;
+	var options = options(arguments);
+ 	var loop = ev.loop();
+
+	state.listen_socket = setup_listener(options);
+
+	loop.add_event_socket(state.listen_socket, EV_LISTEN, state);
+}
+
