@@ -11,7 +11,7 @@ our %tokens = (
   "sep_stament"       => qr/ ; /x,
   "sep_list"          => qr/ , /x,
   "sep_type"          => qr/ : /x,
-  "sep.member"        => qr/ \. /x,
+  "sep_member"        => qr/ \. /x,
 
   "value_string"      => qr/ " [^"]* " /x,
   "value_number"      => qr/ -? \d+ | -? 0x [\da-f]+ | -? 0b [01] | -? 0o [0-8] /x,
