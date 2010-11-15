@@ -39,7 +39,18 @@ sub print_errors
   foreach my $line (@error_lines) { print "$line\n\n"; }
 }
 
-print Dumper($token_list);
-print "\n\n";
+print "Tokenized: \n";
+# print Dumper($token_list);
+# print "\n\n";
 
 print_errors($source, @$token_list);
+
+
+
+use Bolt::Parser;
+
+my @copy = @$token_list;
+
+my $AST = Bolt::Parser::build_AST(\@copy);
+
+print Dumper($AST);
