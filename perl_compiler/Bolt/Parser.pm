@@ -98,13 +98,25 @@ sub parse_import
   # shift off "import"
   shift @$elements;
 
+  # module name
   return make_error("excpected symbol path")
     unless ($import_AST->{import_module} = eat_symbol_path($elements));
 
-  return $import_AST if shift_end($elements);
+  # EOS
+  return $import_AST
+    if shift_end($elements);
 
+  # import symbol list
   $import_AST->{import_sybols} = eat_list($elements)
     if (is_list($elements));
+
+  # EOS
+  return $import_AST
+    if shift_end($elements);
+
+  return make_error("expected something else")
+    unless (shift_next_token($elements, 'keyword:as'));
+
 
   return $import_AST;
 }
