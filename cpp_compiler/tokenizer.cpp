@@ -167,6 +167,39 @@ size_t is_keyword(const char *input_str)
   return 0;
 }
 
+static
+size_t is_symbol(const char *input_str)
+{
+  const char *end = input_str;
+
+  switch (*end) {
+    case 'a' ... 'z':
+    case 'A' ... 'Z':
+    case '_':
+    case '$':
+    case '@':
+      break;
+    default:
+      return 0;
+  }
+
+  for (end++; end != '\0'; end++) {
+    switch (*end) {
+      case 'a' ... 'z':
+      case 'A' ... 'Z':
+      case '_':
+      case '$':
+      case '@':
+      case '!':
+        break;
+      default:
+        return end - input_str;
+    }
+  }
+
+  return end - input_str;
+}
+
 token_func token_functions[] = {
   is_comment_line,
   is_comment_long,
@@ -175,11 +208,18 @@ token_func token_functions[] = {
   is_sep_list,
   is_sep_type,
   is_sep_member,
+  is_l_paren,
+  is_r_paren,
+  is_l_bracket,
+  is_r_bracket,
+  is_l_curly,
+  is_r_curly,
   is_value_string,
   is_value_float,
   is_value_number,
   is_value_char,
   is_keyword,
+  is_symbol,
 };
 
 
