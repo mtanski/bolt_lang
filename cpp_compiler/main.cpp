@@ -48,7 +48,7 @@ int main(int argc, char* argv[])
 
   token_list tokens = tokenizer(src);
 
-  printf("Parsed elements: %i", tokens.size()); 
+  dump_tokens(tokens);
 
   return 0;
 }
