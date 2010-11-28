@@ -41,7 +41,7 @@ int main(int argc, char* argv[])
   if (argc < 2)
     error(1, "Not enought arguments");
 
-  const char *src = (char *) mmap_file(argv[0]);
+  const char *src = (char *) mmap_file(argv[1]);
 
   if (src == NULL)
     error(1, "Unable to open file: %s", argv[1]);
