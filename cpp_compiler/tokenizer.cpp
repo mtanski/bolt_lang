@@ -1,3 +1,8 @@
+/* libc */
+#include <string.h>
+/* c++ */
+#include <vector>
+/* bolt */
 #include "tokenizer.hpp"
 
 
@@ -168,6 +173,24 @@ size_t is_keyword(const char *input_str)
 }
 
 static
+size_t is_operator(const char *input_str)
+{
+  static const char* operators[] = { "+", "-", "*", "/", "%", 
+                                     "=",
+                                     "==", "!=", "<", ">", "<=", ">=",
+                                     "!", "&", "|", "^",
+                                     "and", "or", "not", "xor", NULL };
+
+  for (const char **cur = operators; *cur != NULL; cur++) {
+    if (strcmp(input_str, *cur) == 0) {
+      return strlen(*cur);
+    }
+  }
+
+  return 0;
+}
+
+static
 size_t is_symbol(const char *input_str)
 {
   const char *end = input_str;
@@ -219,15 +242,65 @@ token_func token_functions[] = {
   is_value_number,
   is_value_char,
   is_keyword,
+  is_operator,
   is_symbol,
+  NULL
 };
 
+static
+token make_error(const char *input_str)
+{
+  size_t offset;
+
+  for (offset = 0; input_str[offset] != '\0'; offset++) {
+    switch (input_str[offset]) {
+      case '\r':
+      case '\n':
+        goto eol;
+    }  
+  }
+
+eol:
+  return { TOKEN_ERROR, input_str, offset };
+}
+
+static
+token process_token(const char *input_str)
+{
+  for (int i = 0; token_functions[i] != '\0'; i++) {
+
+    size_t eat_len = token_functions[i](input_str);
+    if (eat_len == 0) continue;
+
+    return { (token_type) i, input_str, eat_len };
+  }
+
+  /* Unknown token, error token eats chars till the end of the line */
+  return make_error(input_str);
+}
 
 token_list tokenizer(const char *input_str)
 {
   token_list output;
 
+  while (input_str != '\0') {
+
+    token tmp = process_token(input_str);
+
+    /* Advance input text pointer */
+    input_str += tmp.len;
+
+    /* Ignore comments & whitscape */
+    switch (tmp.type) {
+      case TOKEN_COMMENT_LINE:
+      case TOKEN_COMMENT_LONG:
+      case TOKEN_WHITESPACE:
+        break;
+      default:
+        output.push_back(tmp);
+    }
+  }
+
   return output;
 }
-
 
