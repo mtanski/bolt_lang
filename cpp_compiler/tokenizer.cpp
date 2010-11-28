@@ -164,7 +164,7 @@ size_t is_keyword(const char *input_str)
                                     "import", "labda", "object", "switch", "struct", "var", NULL };
 
   for (const char **cur = keywords; *cur != NULL; cur++) {
-    if (strcmp(input_str, *cur) == 0) {
+    if (strncmp(input_str, *cur, strlen(*cur)) == 0) {
       return strlen(*cur);
     }
   }
@@ -182,7 +182,7 @@ size_t is_operator(const char *input_str)
                                      "and", "or", "not", "xor", NULL };
 
   for (const char **cur = operators; *cur != NULL; cur++) {
-    if (strcmp(input_str, *cur) == 0) {
+    if (strncmp(input_str, *cur, strlen(*cur)) == 0) {
       return strlen(*cur);
     }
   }
