@@ -283,7 +283,7 @@ token_list tokenizer(const char *input_str)
 {
   token_list output;
 
-  while (input_str != '\0') {
+  while (*input_str != '\0') {
 
     token tmp = process_token(input_str);
 
