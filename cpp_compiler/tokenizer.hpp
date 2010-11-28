@@ -36,5 +36,9 @@ struct token
 
 typedef std::vector<token> token_list;
 
+
 token_list tokenizer(const char *input_str);
 
+
+const char* token_name(enum token_type type);
+void dump_tokens(const token_list& list);

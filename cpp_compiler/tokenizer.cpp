@@ -3,6 +3,7 @@
 /* c++ */
 #include <vector>
 /* bolt */
+#include "utils.h"
 #include "tokenizer.hpp"
 
 
@@ -304,3 +305,41 @@ token_list tokenizer(const char *input_str)
   return output;
 }
 
+
+const char* token_name(enum token_type type)
+{
+#define __TOKEN_PRINT(x) case x: return STRINGIFY(x)
+
+  switch (type) {
+    __TOKEN_PRINT(TOKEN_ERROR);
+    __TOKEN_PRINT(TOKEN_COMMENT_LINE);
+    __TOKEN_PRINT(TOKEN_COMMENT_LONG);
+    __TOKEN_PRINT(TOKEN_WHITESPACE);
+    __TOKEN_PRINT(TOKEN_SEP_STATEMENT);
+    __TOKEN_PRINT(TOKEN_SEP_LIST);
+    __TOKEN_PRINT(TOKEN_SEP_TYPE);
+    __TOKEN_PRINT(TOKEN_SEP_MEMBER);
+    __TOKEN_PRINT(TOKEN_VALUE_STRING);
+    __TOKEN_PRINT(TOKEN_VALUE_NUMBER);
+    __TOKEN_PRINT(TOKEN_VALUE_FLOAT);
+    __TOKEN_PRINT(TOKEN_VALUE_CHAR);
+    __TOKEN_PRINT(TOKEN_PAREN_L);
+    __TOKEN_PRINT(TOKEN_PAREN_R);
+    __TOKEN_PRINT(TOKEN_BRACKET_L);
+    __TOKEN_PRINT(TOKEN_BRACKET_R);
+    __TOKEN_PRINT(TOKEN_CURLY_L);
+    __TOKEN_PRINT(TOKEN_CURLY_R);
+    __TOKEN_PRINT(TOKEN_KEYWORD);
+    __TOKEN_PRINT(TOKEN_OPERATOR);
+    __TOKEN_PRINT(TOKEN_SYMBOL);
+    default:
+      return "Unknown";
+  }
+}
+
+void dump_tokens(const token_list& list)
+{
+  for (const token& t: list) {
+    printf("  token: %s len: %i value: %.*s\n", token_name(t.type), t.len, t.len, t.value);
+  }
+}
