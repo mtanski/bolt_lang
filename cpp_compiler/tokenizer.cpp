@@ -43,16 +43,15 @@ static size_t is_##name(const char *input_str)  \
 }
 
 /* Get a back betweeb start and end */
-#define TOKEN_BLOCK(name, s, e)                 \
-static size_t is_##name(const char *input_str)  \
-{                                               \
-  if (strcmp(input_str, s) == 0) {              \
-    const char *end = strstr(input_str, e);     \
-                                                \
-    if (end != NULL)                            \
-      return end - input_str;                   \
-  }                                             \
-  return 0;                                     \
+#define TOKEN_BLOCK(name, s, e)                             \
+static size_t is_##name(const char *input_str)              \
+{                                                           \
+  if (strncmp(input_str, s, strlen(s)) == 0) {              \
+    const char *end = strstr(input_str + strlen(s), e);     \
+    if (end != NULL)                                        \
+      return (end + strlen(e)) - input_str;                 \
+  }                                                         \
+  return 0;                                                 \
 }
 
 
