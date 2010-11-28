@@ -1,8 +1,25 @@
 #include <fcntl.h>
+#include <stdio.h>
+#include <stdarg.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
 
 #include "tokenizer.hpp"
+
+static
+void error(int err, const char *format, ...)
+{
+  va_list ap;
+
+va_start(ap, format);
+
+  vfprintf(stderr, format, ap);
+  fprintf(stderr, "\n");
+
+va_end(ap);
+
+  exit(err);
+}
 
 
 void* mmap_file(const char* path)
@@ -21,10 +38,13 @@ void* mmap_file(const char* path)
 
 int main(int argc, char* argv[])
 {
-  if (argc < 1)
-    return 1;
+  if (argc < 2)
+    error(1, "Not enought arguments");
 
   const char *src = (char *) mmap_file(argv[0]);
+
+  if (src == NULL)
+    error(1, "Unable to open file: %s", argv[1]);
 
   token_list tokens = tokenizer(src);
 
