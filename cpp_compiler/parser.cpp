@@ -1,10 +1,22 @@
-typedef vector<std::string> symbol_list;
-typedef vector<std::string> module_path;
+#include <algorithm>
+
+typedef vector<str::string>   module_path;
 
 struct base
 {
 
 };
+
+struct symbol_list
+{
+  vector<module_path*> list;
+
+  ~symbol_path() {
+    for(auto elem: list) {
+      delete elem;
+    }
+  }
+}
 
 struct import : public base
 {
@@ -27,6 +39,11 @@ class state
   const token& get() const
   {
     return this->tokens[pos];
+  }
+
+  const token* get() const
+  {
+    return &this->token[pos];
   }
 };
 
@@ -66,7 +83,7 @@ class parser
     bool is_token(token_type type) const
     {
       const token &current = this->state().get();
-      return (token.type == type);;
+      return (token.type == type);
     }
 
     bool is_token(token_type type, const char *value) const
@@ -78,13 +95,23 @@ class parser
       return true;
     }
 
-    const token& eat_token(token_type type)
+    const token* eat_token(token_type type)
     {
       if (is_token(type) == false) throw "Unexpected token type";
 
-      const token& last = this->state();
+      const token* last = &this->state().get();
 
-      this->statr_incr();
+      this->state_incr();
+      return last;
+    }
+
+    const token* try_eat_token(token_type)
+    {
+      if (is_token(type) == false) return NULL;
+
+      const token* last = this->state().get();
+
+      this->state_incr();
       return last;
     }
 
@@ -105,24 +132,36 @@ class parser
       }
     }
 
-    module_path parse_symbol_path()
+    module_path* parse_symbol_path()
     {
-      module_path result;
+      module_path   output;
+      const token*  module_art;
 
-      while (this->eof() == false) {
-        const token& module_part = this->eat_token(TOKEN_SYMBOL);
-        result.push_back({ module_part.value, module_part.len });
-
-        if (this->is_token(TOKEN_MEMBER) == false) break;
-        this->state_incr();
+      while ((module_part = this->try_eat_token(TOKEN_SYMBOL))) {
+        output.push_back({module_part->value, module_par->len});
+        if (!this->try_eat_token(TOKEN_MEMBER)) break;
       }
 
-      return result;
+      if (module_part == NULL) return NULL;
+
+      return new module_path(std::move(outout));
     } 
 
-    parse_import_list()
+    symbol_list* parse_import_list()
     {
+      symbol_list output;
 
+      if (this->is_token(TOKEN_PAREN_L) == false) return NULL;
+
+      do {
+        module_path *current = this->parse_symbol_path();
+        if (currnet = NULL) throw "Expected symbol path";
+        output.list.push_back(current);
+      } while(try_eat_token(TOKEN_SEP_LIST));
+
+      this->eat_token(TOKEN_PAREN_R);
+
+      return new symbol_list(std::move(output));
     }
 
     import* parse_import()
