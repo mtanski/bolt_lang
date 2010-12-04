@@ -31,6 +31,15 @@ struct token
   token_type    type;
   const char*   value;
   size_t        len;
+
+  token(token_type _type, const char *_value, size_t _len)
+    : type(_type), value(_value), len(_len)
+  { }
+
+  bool operator!() const
+  { 
+    return this->type != TOKEN_ERROR;
+  }
 };
 
 
