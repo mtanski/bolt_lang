@@ -1,7 +1,12 @@
+/* libc */
+#include <cstring>
+/* C++ */
 #include <algorithm>
 #include <map>
 #include <string>
 #include <vector>
+/* bolt */
+#include "tokenizer.hpp"
 
 typedef std::vector<std::string>            t_module_path;
 typedef std::string                         t_symbol;
@@ -52,20 +57,30 @@ class state
     const token_list &tokens;
     unsigned          pos;
 
+  private:
+    state(const token_list& _t, unsigned _p)
+      : tokens(_t), pos(_p)
+    { }
+
   public:
 
     state(const token_list& _t)
       : tokens(_t), pos(0)
     { }
 
-    const token& get() const
-    {
-      return this->tokens[pos];
-    }
-
     const token* get() const
     {
-      return &this->token[pos];
+      return &this->tokens[pos];
+    }
+
+    bool eof() const
+    {
+      return (this->pos >= tokens.size());
+    }
+
+    class state operator++(int) const
+    {
+      return { this->tokens, this->pos + 1 };
     }
 };
 
@@ -87,33 +102,32 @@ class parser
 
   protected:
 
-    const state& state() const
+    const state& state_get() const
     {
       return this->state_stack.back();
     }
 
     const state& state_incr()
     {
-      state cur = this->state();
-      cur.pos++;
-      this->state_stack.push_back(std::move(cur));
-      return this->state();
+      const state& cur = this->state_get();
+      this->state_stack.push_back(std::move(cur++));
+      return this->state_get();
     }
 
     bool is_token(token_type type, const char* value = NULL) const
     {
-      const token &current = this->state().get();
+      const token *current = this->state_get().get();
 
-      if (token.type != type) return false;
+      if (current->type != type) return false;
       if (value == NULL) return true;
-      if (strncmp(token.value, value, token.value_len) != 0) return false;
+      if (strncmp(current->value, value, current->len) != 0) return false;
       return true;
     }
 
     /** Eat any token that comes up next. */
-    const token* eat_token() const
+    const token* eat_token()
     {
-      const token* last = &this->state().get();
+      const token* last = this->state_get().get();
       this->state_incr();
       return last;
     }
@@ -124,29 +138,29 @@ class parser
       if (is_token(type) == false) throw "Unexpected token type";
       if (is_token(type, value) == false) throw "Token value unexpected";
 
-      const token* last = &this->state().get();
+      const token* last = this->state_get().get();
 
       this->state_incr();
       return last;
     }
 
     /** Eat the next token if it matches paramters */
-    const token* try_eat_token(token_type, const char *value = NULL)
+    const token* try_eat_token(token_type type, const char *value = NULL)
     {
       if (is_token(type, value) == false) return NULL;
 
-      const token* last = &this->state().get();
+      const token* last = this->state_get().get();
 
       this->state_incr();
       return last;
     }
 
     /** Eat the next token unless it matches paramters */
-    const token* try_eat_token_except(token_type, const char *value = NULL)
+    const token* try_eat_token_except(token_type type, const char *value = NULL)
     {
       if (is_token(type, value) == true) return NULL;
 
-      const token* last = &this->state().get();
+      const token* last = this->state_get().get();
 
       this->state_incr();
       return last;
@@ -154,9 +168,10 @@ class parser
 
     bool eof() const
     {
-      return (this->current_state().pos == this->tokens.size());
+      return this->state_get().eof();
     }
 
+#if 0
     template<typename FUNC, typename... ARGS>
     typename std::resultof<FUNC(ARGS...)>::type
     next_state(const FUNC &func, ARGS... func_arguments) {
@@ -168,6 +183,7 @@ class parser
         throw;
       }
     }
+#endif
 
 }
 
