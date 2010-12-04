@@ -63,10 +63,15 @@ class state
     { }
 
   public:
-
     state(const token_list& _t)
       : tokens(_t), pos(0)
     { }
+
+    state& operator=(const class state &src)
+    {
+      *this = src;
+      return *this;
+    }
 
     const token* get() const
     {
@@ -185,15 +190,14 @@ class parser
     }
 #endif
 
-}
+};
 
 class parser_bolt : public parser
 {
 
   public:
     virtual
-    void run();
-    {
+    void run() {
       while (1) {
         if (this->eof()) {
           break;
@@ -201,7 +205,7 @@ class parser_bolt : public parser
       }
     }
 
-  public:
+  private:
     t_symbol* parse_symbol()
     {
       const token* t;
@@ -214,17 +218,17 @@ class parser_bolt : public parser
 
     t_module_path* parse_symbol_path()
     {
-      module_path   output;
+      t_module_path output;
       const token*  module_part;
 
       while ((module_part = this->try_eat_token(TOKEN_SYMBOL))) {
-        output.push_back({module_part->value, module_par->len});
-        if (!this->try_eat_token(TOKEN_MEMBER)) break;
+        output.push_back({module_part->value, module_part->len});
+        if (!this->try_eat_token(TOKEN_SEP_MEMBER)) break;
       }
 
       if (module_part == NULL) return NULL;
 
-      return new module_path(std::move(outout));
+      return new t_module_path(std::move(output));
     }
 
     t_attr* parse_attrs()
@@ -232,10 +236,10 @@ class parser_bolt : public parser
       t_attr        output;
       const token*  t;
 
-      if (!this->try_eat_token(TOKEN_L_BRACKET)) return NULL;
+      if (!this->try_eat_token(TOKEN_BRACKET_L)) return NULL;
       
-      for (t = this->try_eat_token_except(TOKEN_R_BRACKET); t ;
-           t = this->try_eat_token(TOKEN_R_BRACKET))
+      for (t = this->try_eat_token_except(TOKEN_BRACKET_R); t ;
+           t = this->try_eat_token(TOKEN_BRACKET_R))
       {
         std::string key = { t->value, t->len };
         std::string value = { "true" };
@@ -245,7 +249,7 @@ class parser_bolt : public parser
         if (!this->try_eat_token(TOKEN_SEP_TYPE)) break;
       }
 
-      this->eat_token(TOKEN_R_BRACKET);
+      this->eat_token(TOKEN_BRACKET_R);
       return new t_attr(std::move(output));
     }
 
@@ -256,8 +260,8 @@ class parser_bolt : public parser
       if (!this->try_eat_token(TOKEN_PAREN_L)) return NULL;
 
       do {
-        module_path *current = this->parse_symbol_path();
-        if (currnet = NULL) throw "Expected symbol path";
+        t_module_path *current = this->parse_symbol_path();
+        if (current = NULL) throw "Expected symbol path";
         output.list.push_back(current);
       } while(try_eat_token(TOKEN_SEP_LIST));
 
@@ -289,11 +293,11 @@ class parser_bolt : public parser
     {
       t_struct output;
 
-      if (!(output.name = this->parse_symbol()) return NULL;
+      if (!(output.name = this->parse_symbol())) return NULL;
       if (!this->try_eat_token(TOKEN_SEP_TYPE)) return NULL;
       if (!this->try_eat_token(TOKEN_KEYWORD, "struct")) return NULL;
 
       return new t_struct(std::move(output));
     }
-}
+};
 

@@ -1,6 +1,6 @@
 CXXFLAGS:=$(CXXFLAGS) --std=gnu++0x -O0 -g3
 
-OBJECTS:=main.o tokenizer.o
+OBJECTS:=main.o tokenizer.o parser.o
 
 .PHONY: all clean
 
