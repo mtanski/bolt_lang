@@ -14,7 +14,7 @@ client : object
 	pending_requests : map[type:ref request];
 };
 
-msg : struct(packed:true)
+msg : struct[packed=true]
 {
 	header[4]	: uint8;
 	len       	: uint32[attr=netorder];
@@ -31,7 +31,7 @@ client_msg : object
 {
 	msg : *msg;
 
-	create_error(id: uint32): function[attr:unsafe,create]()
+	create_error(id: uint32): function[attr=unsafe,create]()
 	{
 		msg = make msg;
 		msg = { id = id, header = [ 'S', 'P', 'A', 'M'] };
