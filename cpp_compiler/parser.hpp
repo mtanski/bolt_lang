@@ -108,12 +108,12 @@ class parser
     virtual
     void run() = 0;
 
-  protected:
-
     const state& state_get() const
     {
       return this->state_stack.back();
     }
+
+  protected:
 
     const state& state_incr()
     {

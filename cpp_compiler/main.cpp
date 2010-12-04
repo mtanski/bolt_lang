@@ -56,6 +56,8 @@ int main(int argc, char* argv[])
   try {
     parser.run();
   } catch (const char *msg) {
+    auto foo = parser.state_get().get();
+    printf("Error loc: %.*s\n", 20, foo->value);
     error(2, "Error: %s", msg);
   }
 
