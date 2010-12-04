@@ -5,6 +5,7 @@
 #include <sys/stat.h>
 
 #include "tokenizer.hpp"
+#include "parser.hpp"
 
 static
 void error(int err, const char *format, ...)
@@ -49,6 +50,14 @@ int main(int argc, char* argv[])
   token_list tokens = tokenizer(src);
 
   dump_tokens(tokens);
+
+  parser_bolt parser(tokens);
+
+  try {
+    parser.run();
+  } catch (const char *msg) {
+    error(2, "Error: %s", msg);
+  }
 
   return 0;
 }
