@@ -1,13 +1,17 @@
 #include <algorithm>
+#include <map>
+#include <vector>
 
-typedef vector<str::string>   module_path;
+typedef vector<str::string>                 t_module_path;
+typedef std::string                         t_symbol;
+typedef std::map<std::string, std::string>  t_attr;
 
 struct base
 {
 
 };
 
-struct symbol_list
+struct t_symbol_list : public base
 {
   vector<module_path*> list;
 
@@ -18,13 +22,23 @@ struct symbol_list
   }
 }
 
-struct import : public base
+struct t_import : public base
 {
-  module_path  *module_name;
-  symbol_list  *symbols;
+  t_module_path   *module_name;
+  t_symbol_list   *symbols;
 
-  module_path  *as_name;
-  symbol_list  *as_symbols;
+  t_module_path   *as_name;
+  t_symbol_list   *as_symbols;
+};
+
+struct t_attrs : public
+{
+  t_attr           pairs;
+};
+
+struct t_struct : public base
+{
+  t_symbol        *name;
 };
 
 class state
@@ -90,6 +104,15 @@ class parser
       return true;
     }
 
+    /** Eat any token that comes up next. */
+    const token* eat_token() const
+    {
+      const token* last = &this->state().get();
+      this->state_incr();
+      return last;
+    }
+
+    /** Eat the token that matches paramaters, if not error out. */
     const token* eat_token(token_type type, const char* value = NULL)
     {
       if (is_token(type) == false) throw "Unexpected token type";
@@ -101,9 +124,21 @@ class parser
       return last;
     }
 
+    /** Eat the next token if it matches paramters */
     const token* try_eat_token(token_type, const char *value = NULL)
     {
       if (is_token(type, value) == false) return NULL;
+
+      const token* last = &this->state().get();
+
+      this->state_incr();
+      return last;
+    }
+
+    /** Eat the next token unless it matches paramters */
+    const token* try_eat_token_except(token_type, const char *value = NULL)
+    {
+      if (is_token(type, value) == true) return NULL;
 
       const token* last = &this->state().get();
 
@@ -128,7 +163,17 @@ class parser
       }
     }
 
-    module_path* parse_symbol_path()
+    t_symbol* parse_symbol()
+    {
+      const token* t;
+
+      if ((t = this->try_eat_token(TOKEN_SYMBOL)))
+        return new t_symbol(t->value, t->len);
+
+      return NULL;
+    }
+
+    t_module_path* parse_symbol_path()
     {
       module_path   output;
       const token*  module_part;
@@ -141,11 +186,33 @@ class parser
       if (module_part == NULL) return NULL;
 
       return new module_path(std::move(outout));
-    } 
+    }
 
-    symbol_list* parse_import_list()
+    t_attr* parse_attrs()
     {
-      symbol_list output;
+      t_attr        output;
+      const token*  t;
+
+      if (!this->try_eat_token(TOKEN_L_BRACKET)) return NULL;
+      
+      for (t = this->try_eat_token_except(TOKEN_R_BRACKET); t ;
+           t = this->try_eat_token(TOKEN_R_BRACKET))
+      {
+        std::string key = { t->value, t->len };
+        std::string value = { "true" };
+
+        if (this->try_eat_token(TOKEN_OPERATOR, "=")) throw "No attribute value";
+
+        if (!this->try_eat_token(TOKEN_SEP_TYPE)) break;
+      }
+
+      this->eat_token(TOKEN_R_BRACKET);
+      return new t_attr(std::move(output));
+    }
+
+    t_symbol_list* parse_import_list()
+    {
+      t_symbol_list output;
 
       if (!this->try_eat_token(TOKEN_PAREN_L)) return NULL;
 
@@ -156,12 +223,12 @@ class parser
       } while(try_eat_token(TOKEN_SEP_LIST));
 
       this->eat_token(TOKEN_PAREN_R);
-      return new symbol_list(std::move(output));
+      return new t_symbol_list(std::move(output));
     }
 
-    import* parse_import()
+    t_import* parse_import()
     {
-      import output;
+      t_import output;
 
       if (this->try_eat_token(TOKEN_KEYWORD, "import")) return NULL;
 
@@ -176,7 +243,18 @@ class parser
       }
 
       this->eat_token(TOKEN_SEP_STATEMENT);
-      return new import(std::move(output));
+      return new t_import(std::move(output));
+    }
+
+    t_struct* parse_struct()
+    {
+      t_struct output;
+
+      if (!(output.name = this->parse_symbol()) return NULL;
+      if (!this->try_eat_token(TOKEN_SEP_TYPE)) return NULL;
+      if (!this->try_eat_token(TOKEN_KEYWORD, "struct")) return NULL;
+
+      return new t_struct(std::move(output));
     }
 
   private:
