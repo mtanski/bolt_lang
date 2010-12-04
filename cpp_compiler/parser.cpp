@@ -71,23 +71,21 @@ class state
 
 class parser
 {
+  private:
+    token_list	          tokens;
+    std::vector<state>    state_stack;
+
   public:
     parser(token_list input)
-      : tokens(input)
+      : tokens(std::move(input))
     {
       this->state_stack.push_back({ this->tokens });
     }
 
-    void run()
-    {
-      while (1) {
-        if (this->eof()) {
-          break;
-        }
-      }
-    }
+    virtual
+    void run() = 0;
 
-  private:
+  protected:
 
     const state& state() const
     {
@@ -171,6 +169,23 @@ class parser
       }
     }
 
+}
+
+class parser_bolt : public parser
+{
+
+  public:
+    virtual
+    void run();
+    {
+      while (1) {
+        if (this->eof()) {
+          break;
+        }
+      }
+    }
+
+  public:
     t_symbol* parse_symbol()
     {
       const token* t;
@@ -264,19 +279,5 @@ class parser
 
       return new t_struct(std::move(output));
     }
-
-  private:
-    token_list	    tokens;
-    vector<state>   state_stack;
 }
 
-parser::parser(token_list input)
-  : tokens(std::move(input))
-{
-
-}
-
-symbol_list parser_symbol_list()
-{
-
-}
