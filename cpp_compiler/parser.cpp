@@ -1,26 +1,31 @@
 #include <algorithm>
 #include <map>
+#include <string>
 #include <vector>
 
-typedef vector<str::string>                 t_module_path;
+typedef std::vector<std::string>            t_module_path;
 typedef std::string                         t_symbol;
 typedef std::map<std::string, std::string>  t_attr;
 
 struct base
 {
 
+  virtual
+  const char* dump() const {
+    throw "Unimplemented";
+  }
 };
 
 struct t_symbol_list : public base
 {
-  vector<module_path*> list;
+  std::vector<t_module_path*> list;
 
-  ~symbol_path() {
+  ~t_symbol_list() {
     for(auto elem: list) {
       delete elem;
     }
   }
-}
+};
 
 struct t_import : public base
 {
@@ -31,7 +36,7 @@ struct t_import : public base
   t_symbol_list   *as_symbols;
 };
 
-struct t_attrs : public
+struct t_attrs : public base
 {
   t_attr           pairs;
 };
@@ -43,22 +48,25 @@ struct t_struct : public base
 
 class state
 {
-  state(const token_list& _t)
-    : tokens(_t), pos(0)
-  { }
+  private:
+    const token_list &tokens;
+    unsigned          pos;
 
-  const token_list &tokens;
-  unsigned          pos;
+  public:
 
-  const token& get() const
-  {
-    return this->tokens[pos];
-  }
+    state(const token_list& _t)
+      : tokens(_t), pos(0)
+    { }
 
-  const token* get() const
-  {
-    return &this->token[pos];
-  }
+    const token& get() const
+    {
+      return this->tokens[pos];
+    }
+
+    const token* get() const
+    {
+      return &this->token[pos];
+    }
 };
 
 class parser
