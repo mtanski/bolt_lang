@@ -55,6 +55,10 @@ int main(int argc, char* argv[])
 
   try {
     parser.run();
+  } catch (exception &err) {
+    std::string txt = err.what_long();
+
+    error(2, "Error: %s", txt.c_str());
   } catch (const char *msg) {
     auto foo = parser.state_get().get();
     printf("Error loc: %.*s\n", 20, foo->value);

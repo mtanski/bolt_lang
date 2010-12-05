@@ -9,14 +9,14 @@
 #include <string>
 #include <vector>
 /* bolt */
+#include "error.hpp"
 #include "tokenizer.hpp"
-
 
 typedef std::vector<std::string>            t_module_path;
 typedef std::string                         t_symbol;
 typedef std::map<std::string, std::string>  t_attr;
 
-struct base
+struct t_base
 {
   virtual
   const char* dump() const {
@@ -24,7 +24,7 @@ struct base
   }
 };
 
-struct t_symbol_list : public base
+struct t_symbol_list : public t_base
 {
   std::vector<t_module_path*> list;
 
@@ -35,7 +35,7 @@ struct t_symbol_list : public base
   }
 };
 
-struct t_import : public base
+struct t_import : public t_base
 {
   t_module_path   *module_name;
   t_symbol_list   *symbols;
@@ -44,12 +44,12 @@ struct t_import : public base
   t_symbol_list   *as_symbols;
 };
 
-struct t_attrs : public base
+struct t_attrs : public t_base
 {
   t_attr           pairs;
 };
 
-struct t_struct : public base
+struct t_struct : public t_base
 {
   t_symbol        *name;
 };
@@ -118,6 +118,7 @@ class parser
     const state& state_incr()
     {
       const state& cur = this->state_get();
+      
       this->state_stack.push_back(std::move(cur++));
       return this->state_get();
     }
@@ -125,7 +126,6 @@ class parser
     bool is_token(token_type type, const char* value = NULL) const
     {
       const token *current = this->state_get().get();
-
       if (current->type != type) return false;
       if (value == NULL) return true;
       if (strncmp(current->value, value, current->len) != 0) return false;
@@ -141,16 +141,7 @@ class parser
     }
 
     /** Eat the token that matches paramaters, if not error out. */
-    const token* eat_token(token_type type, const char* value = NULL)
-    {
-      if (is_token(type) == false) throw "Unexpected token type";
-      if (is_token(type, value) == false) throw "Token value unexpected";
-
-      const token* last = this->state_get().get();
-
-      this->state_incr();
-      return last;
-    }
+    const token* eat_token(token_type type, const char* value = NULL);
 
     /** Eat the next token if it matches paramters */
     const token* try_eat_token(token_type type, const char *value = NULL)

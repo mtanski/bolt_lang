@@ -2,17 +2,30 @@
 #include "tokenizer.hpp"
 #include "parser.hpp"
 
+
+const token* parser::eat_token(token_type type, const char* value)
+{
+  if (is_token(type) == false) throw bad_token(this->state_get(), type);
+  if (is_token(type, value) == false) throw bad_token_value(this->state_get(), type, value);
+
+  const token* last = this->state_get().get();
+
+  this->state_incr();
+  return last;
+}
+
+
 void parser_bolt::run()
 {
-  std::vector<base *> output;
+  std::vector<t_base *> output;
 
   while (!this->eof()) {
-    struct base *elem;
+    struct t_base *elem;
 
     if (!((elem = this->parse_import()) ||
           (elem = this->parse_struct())))
     {
-      throw "Unable to parse token";
+      throw bad_statement(this->state_get());
     }
 
     output.push_back(elem);
@@ -86,7 +99,7 @@ t_import* parser_bolt::parse_import()
 {
   t_import output;
 
-  if (this->try_eat_token(TOKEN_KEYWORD, "import")) return NULL;
+  if (!this->try_eat_token(TOKEN_KEYWORD, "import")) return NULL;
 
   if (!(output.module_name = this->parse_symbol_path()))
     throw "Expected module name";
