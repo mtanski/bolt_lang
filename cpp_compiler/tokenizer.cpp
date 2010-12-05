@@ -210,6 +210,7 @@ size_t is_symbol(const char *input_str)
     switch (*end) {
       case 'a' ... 'z':
       case 'A' ... 'Z':
+      case '0' ... '9':
       case '_':
       case '$':
       case '@':
