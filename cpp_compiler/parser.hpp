@@ -11,48 +11,8 @@
 /* bolt */
 #include "error.hpp"
 #include "tokenizer.hpp"
+#include "types.hpp"
 
-typedef std::vector<std::string>            t_module_path;
-typedef std::string                         t_symbol;
-typedef std::map<std::string, std::string>  t_attr;
-
-struct t_base
-{
-  virtual
-  const char* dump() const {
-    throw "Unimplemented";
-  }
-};
-
-struct t_symbol_list : public t_base
-{
-  std::vector<t_module_path*> list;
-
-  ~t_symbol_list() {
-    for(auto elem: list) {
-      delete elem;
-    }
-  }
-};
-
-struct t_import : public t_base
-{
-  t_module_path   *module_name;
-  t_symbol_list   *symbols;
-
-  t_module_path   *as_name;
-  t_symbol_list   *as_symbols;
-};
-
-struct t_attrs : public t_base
-{
-  t_attr           pairs;
-};
-
-struct t_struct : public t_base
-{
-  t_symbol        *name;
-};
 
 class state
 {
@@ -128,6 +88,7 @@ class parser
       const token *current = this->state_get().get();
       if (current->type != type) return false;
       if (value == NULL) return true;
+      printf("%.*s / %s\n", current->len, current->value, value);
       if (strncmp(current->value, value, current->len) != 0) return false;
       return true;
     }
@@ -169,21 +130,6 @@ class parser
     {
       return this->state_get().eof();
     }
-
-#if 0
-    template<typename FUNC, typename... ARGS>
-    typename std::resultof<FUNC(ARGS...)>::type
-    next_state(const FUNC &func, ARGS... func_arguments) {
-      unsigned size = this->state_stack.size();
-      try {
-        return func(args...);
-      } catch(...) {
-        this->state_stack.resize = size;
-        throw;
-      }
-    }
-#endif
-
 };
 
 class parser_bolt : public parser
@@ -205,7 +151,8 @@ class parser_bolt : public parser
     t_symbol_list*  parse_import_list();
     t_import*       parse_import();
 
-    t_struct*       parse_struct();
+    t_container*    parse_struct();
+    t_container*    parse_object();
 };
 
 #endif /* __PARSER_HPP__ */

@@ -1,7 +1,7 @@
 CFLAGS:=$(CFLAGS) --std=gnu99 -O0 -ggdb3
 CXXFLAGS:=$(CXXFLAGS) --std=gnu++0x -O0 -ggdb3
 
-OBJECTS:=main.o tokenizer.o parser.o utils.o error.o
+OBJECTS:=main.o tokenizer.o parser.o utils.o error.o print.o
 
 .PHONY: all clean
 

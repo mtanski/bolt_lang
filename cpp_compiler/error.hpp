@@ -5,7 +5,7 @@
 #include <exception>
 #include <string>
 /* bolt */
-#include "types.hpp"
+#include "boltdef.hpp"
 #include "error.hpp"
 #include "parser.hpp"
 #include "tokenizer.hpp"

@@ -23,7 +23,9 @@ void parser_bolt::run()
     struct t_base *elem;
 
     if (!((elem = this->parse_import()) ||
-          (elem = this->parse_struct())))
+          (elem = this->parse_struct()) ||
+          (elem = this->parse_object())
+       ))
     {
       throw bad_statement(this->state_get());
     }
@@ -115,14 +117,27 @@ t_import* parser_bolt::parse_import()
   return new t_import(std::move(output));
 }
 
-t_struct* parser_bolt::parse_struct()
+t_container* parser_bolt::parse_struct()
 {
   t_struct output;
-
+  
   if (!(output.name = this->parse_symbol())) return NULL;
   if (!this->try_eat_token(TOKEN_SEP_TYPE)) return NULL;
   if (!this->try_eat_token(TOKEN_KEYWORD, "struct")) return NULL;
+  
 
   return new t_struct(std::move(output));
+}
+
+t_container* parser_bolt::parse_object()
+{
+  t_object output;
+  
+  if (!(output.name = this->parse_symbol())) return NULL;
+  if (!this->try_eat_token(TOKEN_SEP_TYPE)) return NULL;
+  if (!this->try_eat_token(TOKEN_KEYWORD, "object")) return NULL;
+  
+  
+  return new t_object(std::move(output));
 }
 
